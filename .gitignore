@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# FastAPI / env
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs e sistema
+*.log
+*.pid
+
+# Pytest
+htmlcov/
+.coverage
+.cache
+
+# Node.js (caso inclua frontend no mesmo repositório)
+node_modules/
+.next/
+dist/
+
