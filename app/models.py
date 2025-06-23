@@ -1,8 +1,11 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Boolean, Text
+import enum
+from sqlalchemy import Enum,Column, DateTime, ForeignKey, Integer, String, Boolean, Text
 from .database import Base
 from sqlalchemy.orm import relationship
 from datetime import datetime
+import enum
 
+status_enum = Enum('Pendente', 'Em andamento', 'Concluído', name='status_enum')
 
 class User(Base):
     __tablename__ = "users"
@@ -34,7 +37,8 @@ class List(Base):
     board_id = Column(Integer, ForeignKey('boards.id'))
 
     board = relationship("Board", back_populates="lists")
-    task = relationship("Task", back_populates="list", cascade="all, delete")
+    tasks = relationship("Task", back_populates="list", cascade="all, delete")
+
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -44,10 +48,11 @@ class Task(Base):
     posicao = Column(Integer, nullable=False)
     venci_data = Column(DateTime) 
     prioridade = Column(String(50))
-
+    status = Column(status_enum, nullable=False, default='pendente')
+  
     list_id = Column(Integer, ForeignKey('lists.id'))
   
-    list = relationship("List", back_populates="task")
+    list = relationship("List", back_populates="tasks")
     anexo = relationship("Anexos", back_populates="task", cascade="all, delete")
  
 class Anexos(Base):

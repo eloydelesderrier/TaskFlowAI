@@ -1,56 +1,72 @@
-from sqlalchemy.orm import Session
-from app.models import Task
+from fastapi import HTTPException
+from sqlalchemy.orm import Session, joinedload
+from app.models import List, Task
 from app.schemas.task import TaskBase, TaskCreate, TaskDelete, TaskUpdate ,TaskOut
 
 
-def criar_tasks(db: Session, task: TaskCreate):
-    db_task = Task(
-        titulo = task.titulo,
-        descricao = task.descricao,
-        posicao = task.posicao,
-        venci_data = task.venci_data,
-        prioridade = task.prioridade,
-        list_id = task.list_id
-    )
+def criar_task(db: Session, task: TaskCreate):
+    lista = db.query(List).filter(List.id == task.list_id).first()
+    if not lista:
+        raise HTTPException(status_code=404, detail="Lista não encontrada")
+
+    db_task = Task(**task.dict())
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
-    return db_task
+    return db_task, lista.board_id
 
+def listar_tasks_por_list(db: Session, list_id: int):
+    tasks = db.query(Task).options(joinedload(Task.list)).filter(Task.list_id == list_id).all()
+    return [(
+        task,
+        task.list.board_id
+    ) for task in tasks]
 
-def busca_task_list(db: Session, list_id: int):
-    return (
-        db.query(Task).filter(Task.list_id == list_id)
-        .order_by(Task.posicao).all()
+def obter_task(db: Session, task_id: int):
+    task = db.query(Task).options(joinedload(Task.list)).filter(Task.id == task_id).first()
+    
+    if not task:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+
+    if not task.list:
+        raise HTTPException(status_code=500, detail="A tarefa não está associada a uma lista válida")
+
+    return TaskOut(
+        id=task.id,
+        titulo=task.titulo,
+        descricao=task.descricao,
+        posicao=task.posicao,
+        venci_data=task.venci_data,
+        prioridade=task.prioridade,
+        status=task.status,
+        list_id=task.list_id,
+        board_id=task.list.board_id  
     )
 
-def busca_task(db: Session, task_id: int):
-    return db.query(Task).filter(Task.id == task_id).first()
-
-
-def atualiza_tasks(db: Session, task_id: int, task: TaskUpdate):
-    db_task = busca_task(db, task_id)
-    if db_task is None:
-        return 'Task não encontrada!'
-    if task.titulo is not None:
-        db_task.titulo = task.titulo
-    if task.descricao is not None:
-        db_task.descricao = task.descricao
-    if task.posicao is not None:
-        db_task.posicao = task.posicao
-    if task.venci_data is not None:
-        db_task.venci_data = task.venci_data
-    if task.prioridade is not None:
-        db_task.prioridade = task.prioridade
-
+def atualizar_task(db: Session, task_id: int, update: TaskUpdate):
+    task = db.query(Task).options(joinedload(Task.list)).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+    for key, value in update.dict(exclude_unset=True).items():
+        setattr(task, key, value)
     db.commit()
-    db.refresh(db_task)
-    return db_task
+    db.refresh(task)
+    return task
 
-def deleta_tasks(db: Session, task_id: int):
-    db_task = busca_task(db, task_id)
-    if db_task is None:
-        return 'Não encontrei a task para deletar'
-    db.delete(db_task)
+def mover_task(db: Session, task_id: int, move_list_id: int, nova_posicao: int):
+    task = db.query(Task).options(joinedload(Task.list)).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+    task.list_id = move_list_id
+    task.posicao = nova_posicao
     db.commit()
-    return db_task
+    db.refresh(task)
+    return task, task.list.board_id
+
+def deletar_task(db: Session, task_id: int):
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+    db.delete(task)
+    db.commit()
+    return {"detail": "Tarefa deletada com sucesso"}

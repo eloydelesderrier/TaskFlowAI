@@ -4,7 +4,7 @@ from app.database import get_db
 from app.models import User
 from app.schemas.anexos import AnexoOut
 from app.crud.anexos import criar_anexo, listar_anexos_por_task, deletar_anexo
-from typing import List as TypeList
+from typing import List as ListResponse
 
 from app.utils.security import obter_usuario_atual
 
@@ -25,7 +25,7 @@ def upload_anexo(
     return criar_anexo(db, file, task_id)
 
 
-@router.get("/listar-anexos/", response_model=TypeList[AnexoOut])
+@router.get("/listar-anexos/", response_model=ListResponse[AnexoOut])
 def listar_anexos(
     task_id: int, 
     db: Session = Depends(get_db), 

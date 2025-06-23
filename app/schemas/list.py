@@ -1,5 +1,7 @@
 from pydantic import BaseModel
-from typing import List as ListType, Optional
+from typing import List as ListResponse, Optional
+
+from app.schemas.task import TaskOut
 
 class ListBase(BaseModel):
     titulo: str
@@ -22,6 +24,7 @@ class ListOut(ListCreate):
     titulo: str
     posicao: int
     board_id: int
+    tasks: ListResponse[TaskOut]
 
     class Config:
         from_attributes = True

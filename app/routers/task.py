@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models import User, Task
 from app.schemas.task import TaskBase, TaskCreate, TaskMove, TaskUpdate, TaskDelete, TaskOut
-from app.crud.task import criar_tasks, busca_task_list, busca_task, atualiza_tasks, deleta_tasks
+from app.crud.task import atualizar_task, criar_task, deletar_task, listar_tasks_por_list
 from app.database import get_db
 from app.utils.security import obter_usuario_atual
-from typing import List as ListType
+from typing import List as ListResponse
 
 router = APIRouter(
     tags=['Tasks']
@@ -13,32 +13,45 @@ router = APIRouter(
 
 @router.post("/criar-tasks/", response_model=TaskOut)
 def create_task(task:TaskCreate, db: Session = Depends(get_db), current_user: User = Depends(obter_usuario_atual)):
-    return criar_tasks(db, task)
+    db_task, board_id = criar_task(db, task)
+    return TaskOut(**db_task.__dict__, board_id=board_id)
+    
 
-@router.get("/tasks-lista/", response_model=ListType[TaskOut])
-def busca_task_lista(list_id: int, db: Session = Depends(get_db), current_user: User = Depends(obter_usuario_atual)):
-    return busca_task_list(db, list_id)
+@router.get("/lista/{list_id}/", response_model=ListResponse[TaskOut])
+def listar_por_lista(list_id: int, db: Session = Depends(get_db), current_user: User = Depends(obter_usuario_atual)):
+    results = listar_tasks_por_list(db, list_id)
+    return [TaskOut(**t.__dict__, board_id=b_id) for t, b_id in results]
 
-@router.get("/tasks/", response_model=TaskOut)
+@router.get("/{tasks_id}/", response_model=TaskOut)
 def busca_taks(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(obter_usuario_atual)):
-    db_task = busca_task(db, task_id)
+    db_task = db.query(Task).filter(Task.id == task_id).first()
 
     if db_task is None:
         raise HTTPException(status_code=404, detail="Task não encontrada")
-    return db_task
+    
+    board_id = db_task.list.board_id if db_task.list else None
+    task_dict = TaskOut.from_orm(db_task).dict()
+    task_dict["board_id"] = board_id
+
+    return TaskOut(**task_dict)
 
 
-@router.put("/update-task/", response_model=TaskOut)
-def update_task(task_id: int, task: TaskUpdate, db: Session = Depends(get_db), current_user: User = Depends(obter_usuario_atual)):
-    db_task = atualiza_tasks(db, task_id, task)
+@router.put("/editar-task/{task_id}", response_model=TaskOut)
+def update_task(
+    task_id: int, 
+    task: TaskUpdate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(obter_usuario_atual)
+):
+    db_task = atualizar_task(db, task_id, task)
     if db_task is None:
         raise HTTPException(status_code=404, detail="task não encontrada!")
     return db_task
 
 
-@router.delete("/deleta-task")
+@router.delete("/deletar-task/{task_id}")
 def delete_task(task_id: int, db: Session = Depends(get_db), current_user: User= Depends(obter_usuario_atual)):
-    db_task = deleta_tasks(db, task_id)
+    db_task = deletar_task(db, task_id)
     if db_task is None:
         raise HTTPException(status_code=404, detail="task não encontrada!")
     return {"Message": "Task Excluida com sucesso!"}

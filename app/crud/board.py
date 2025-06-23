@@ -15,7 +15,7 @@ def criar_board(db: Session, board: BoardCreate, user_id: int):
     return db_board
 
 def obter_board(db: Session, board_id: int):
-    return db.query(Board).filter(Board.id == board_id).all()
+    return db.query(Board).filter(Board.id == board_id).first()
     
  
 def atualizar_board(db: Session ,db_board: Board, board: BoardUpdate):

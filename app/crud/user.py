@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User, TokenBlacklist
 from app.schemas.user import LoginRequest, Token, UserCreate, UserUpdate, UserDelete, TokenBlacklistCreate
-from app.utils.security import criar_acesso_token, senha_hash, verificar_senha, verificar_user_email
+from app.utils.security import ACCESS_TOKEN_EXPIRE_MINUTES, criar_acesso_token, senha_hash, verificar_senha, verificar_user_email
  
   
 def criar_usuario(db: Session, user: UserCreate):
@@ -36,7 +36,6 @@ def login_user(user: LoginRequest, db: Session = Depends(get_db)):
      
     access_token = criar_acesso_token(
         data={"sub":db_user.email},
-        
 
     )
 

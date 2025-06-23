@@ -5,7 +5,7 @@ from app.schemas.list import ListBase, ListCreate, ListUpdate, ListDelete, ListO
 from app.crud.lista import atuliza_list, busca_list, busca_lista_por_board, criar_list, deleta_list
 from app.database import get_db
 from app.utils.security import obter_usuario_atual
-from typing import List as ListType
+from typing import List as ListResponse
 
 
 
@@ -19,7 +19,7 @@ def criar_lista(list_data: ListCreate, db: Session = Depends(get_db), current_us
     Criar uma nova lista."""
     return criar_list(db, list_data)
   
-@router.get("/busca-lista-board/", response_model=ListType[ListOut])
+@router.get("/busca-lista-board/", response_model=ListResponse[ListOut])
 def busca_quadro(board_id: int, db: Session = Depends(get_db), current_user: User = Depends(obter_usuario_atual)):
     return busca_lista_por_board(db, board_id)
 
@@ -29,6 +29,8 @@ def busca_lista(list_id: int, db: Session = Depends(get_db), current_user: User 
     if db_list is None:
         raise HTTPException(status_code=404, detail="Lista não encontrada!")
     return db_list
+
+
 
 
 @router.put("/update-lista/", response_model=ListOut)
