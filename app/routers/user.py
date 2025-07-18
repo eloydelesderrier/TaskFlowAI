@@ -36,12 +36,5 @@ def login_token(form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordReq
     return token_user(form_data, db)
 
 
-from fastapi.responses import Response
 
-@router.options("/login")
-def options_login():
-    return Response(headers={
-        "Access-Control-Allow-Origin": "https://tas-flow-frontend.vercel.app",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "*"
-    })
+
