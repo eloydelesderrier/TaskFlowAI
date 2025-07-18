@@ -9,9 +9,15 @@ app = FastAPI(
     version="1.0.0",
 )
 
+origins = [
+    "https://tas-flow-frontend.vercel.app", # Add your frontend origin here
+    # You can add other allowed origins if needed
+    # "http://localhost:3000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
