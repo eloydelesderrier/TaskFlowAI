@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, utils
 from sqlalchemy.orm import Session
-from app import models
 from app.crud.user import atualizar_user, criar_usuario, deletar_user, login_user, token_user
 from app.models import User
 from app.schemas.user import LoginRequest, UserCreate, UserUpdate, UserDelete, Token
