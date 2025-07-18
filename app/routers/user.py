@@ -35,3 +35,13 @@ def deletar_usuario(user: UserDelete, db: Session = Depends(get_db), current_use
 def login_token(form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm), db: Session = Depends(get_db)):
     return token_user(form_data, db)
 
+
+from fastapi.responses import Response
+
+@router.options("/login")
+def options_login():
+    return Response(headers={
+        "Access-Control-Allow-Origin": "https://tas-flow-frontend.vercel.app",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "*"
+    })
