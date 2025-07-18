@@ -9,11 +9,10 @@ MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
 MYSQL_PORT = int(os.getenv("MYSQL_PORT", 3306))
 MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_NAME = os.getenv("MYSQL_NAME")
-URL=os.getenv("URL")
 
-DATABASE_URL = {URL} or f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_NAME}"
+DATABASE_URL =os.getenv("URL") or f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_NAME}"
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
