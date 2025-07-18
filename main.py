@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(user.router, prefix='/auth')
+app.include_router(user.router)
 app.include_router(boards.router)
 app.include_router(lista.router)
 app.include_router(task.router)
