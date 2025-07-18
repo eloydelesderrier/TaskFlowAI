@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import user, boards, lista, task, anexos
 
+
 app = FastAPI(
     title="TaskFlowAI",
     description="API de kanban",
@@ -16,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(user.router)
+app.include_router(user.router, prefix='/auth')
 app.include_router(boards.router)
 app.include_router(lista.router)
 app.include_router(task.router)
