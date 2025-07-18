@@ -10,12 +10,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://tas-flow-frontend.vercel.app/"],
+    allow_origins=["https://tas-flow-frontend.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
 
 app.include_router(user.router)
 app.include_router(boards.router)
