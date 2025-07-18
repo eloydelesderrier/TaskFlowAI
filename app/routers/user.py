@@ -14,25 +14,25 @@ router = APIRouter(
     tags=['Usuários']
 )
 
-@router.post("/register")
+@router.post("https://tas-flow-frontend.vercel.app/register")
 async def registrar_usuario(user: UserCreate, db: Session = Depends(get_db)):
     return criar_usuario(db, user)
 
 
-@router.post("/login")
+@router.post("https://tas-flow-frontend.vercel.app/login")
 def login(user: LoginRequest, db: Session = Depends(get_db)):
    return login_user(user, db)
     
 
-@router.put("/update")
+@router.put("https://tas-flow-frontend.vercel.app/update")
 def atualizar_usuario( user: UserUpdate, db: Session = Depends(get_db), current_user: User = Depends(obter_usuario_atual)):
     return atualizar_user(db, current_user.id, user)
    
-@router.delete("/delete")
+@router.delete("https://tas-flow-frontend.vercel.app/delete")
 def deletar_usuario(user: UserDelete, db: Session = Depends(get_db), current_user: User = Depends(obter_usuario_atual)):
     return deletar_user(db, current_user.id, user)
 
-@router.post("/token")
+@router.post("https://tas-flow-frontend.vercel.app/token")
 def login_token(form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm), db: Session = Depends(get_db)):
     return token_user(form_data, db)
 
